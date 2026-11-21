@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: image-to-mp4
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health

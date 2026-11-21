@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图片转 MP4 视频</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f5f9;color:#202638;font-family:system-ui,"Noto Sans SC",sans-serif}
+main{max-width:620px;margin:24px auto;padding:18px}.card{background:white;border-radius:18px;padding:20px;box-shadow:0 4px 22px #1d2c4410}
+h1{font-size:24px;margin:0 0 8px}.tip{color:#667085;font-size:14px;line-height:1.6}
+label{display:block;font-weight:650;margin:18px 0 8px}input,textarea,select{width:100%;padding:12px;border:1px solid #d5dae3;border-radius:10px;background:#fff;font-size:16px}
+textarea{min-height:110px;resize:vertical}.btn{margin-top:20px;width:100%;border:0;border-radius:12px;background:#2463eb;color:#fff;padding:15px;font-size:17px;font-weight:700}
+.btn:disabled{opacity:.55}.status{margin-top:14px;font-size:14px;white-space:pre-wrap}.small{font-size:12px;color:#777;margin-top:14px}
+</style></head>
+<body><main><section class="card">
+<h1>图片转 MP4 视频</h1>
+<div class="tip">上传图片，添加字幕和背景音乐，服务器合成标准 MP4 文件。建议先用 2–4 张图片测试。</div>
+<form id="form">
+<label>① 选择图片（最多 8 张）</label>
+<input id="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+<label>② 字幕（每行对应一张图片，可留空）</label>
+<textarea id="subs" placeholder="第一张图片显示的字幕&#10;第二张图片显示的字幕&#10;第三张图片显示的字幕"></textarea>
+<label>③ 每张图片显示时长</label>
+<select id="seconds"><option value="3">3 秒</option><option value="4" selected>4 秒</option><option value="5">5 秒</option><option value="6">6 秒</option><option value="8">8 秒</option></select>
+<label>④ 背景音乐（可选）</label>
+<input id="music" type="file" accept="audio/*">
+<button class="btn" id="go" type="submit">开始合成 MP4</button>
+<div class="status" id="status"></div>
+</form>
+<div class="small">免费服务器可能休眠；首次打开需等待唤醒。图片和音乐会上传到服务器临时处理，请勿上传隐私文件。每张图片不超过 12MB，音乐不超过 20MB，视频最长 64 秒。</div>
+</section></main>
+<script>
+const form=document.getElementById('form'), status=document.getElementById('status'), go=document.getElementById('go');
+form.addEventListener('submit',async e=>{
+ e.preventDefault();const imgs=document.getElementById('images').files;
+ if(!imgs.length||imgs.length>8){status.textContent='请选择 1 到 8 张图片';return}
+ const fd=new FormData();for(const f of imgs)fd.append('images',f);
+ fd.append('subtitles',document.getElementById('subs').value);
+ fd.append('seconds',document.getElementById('seconds').value);
+ const music=document.getElementById('music').files[0];if(music)fd.append('music',music);
+ go.disabled=true;status.textContent='正在上传并合成，请保持页面打开……';
+ try{
+  const r=await fetch('/render',{method:'POST',body:fd});
+  if(!r.ok){let t=await r.text();throw new Error(t)}
+  const blob=await r.blob();const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='我的视频.mp4';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent='合成完成！MP4 已开始下载。';
+ }catch(err){status.textContent='合成失败：'+err.message}
+ finally{go.disabled=false}
+});
+</script></body></html>
