@@ -1,50 +1,237 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>图片转 MP4 视频</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 图片视频工作室</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f5f9;color:#202638;font-family:system-ui,"Noto Sans SC",sans-serif}
-main{max-width:620px;margin:24px auto;padding:18px}.card{background:white;border-radius:18px;padding:20px;box-shadow:0 4px 22px #1d2c4410}
-h1{font-size:24px;margin:0 0 8px}.tip{color:#667085;font-size:14px;line-height:1.6}
-label{display:block;font-weight:650;margin:18px 0 8px}input,textarea,select{width:100%;padding:12px;border:1px solid #d5dae3;border-radius:10px;background:#fff;font-size:16px}
-textarea{min-height:110px;resize:vertical}.btn{margin-top:20px;width:100%;border:0;border-radius:12px;background:#2463eb;color:#fff;padding:15px;font-size:17px;font-weight:700}
-.btn:disabled{opacity:.55}.status{margin-top:14px;font-size:14px;white-space:pre-wrap}.small{font-size:12px;color:#777;margin-top:14px}
-</style></head>
-<body><main><section class="card">
-<h1>图片转 MP4 视频</h1>
-<div class="tip">上传图片，添加字幕和背景音乐，服务器合成标准 MP4 文件。建议先用 2–4 张图片测试。</div>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101522;color:#fff;
+ font-family:system-ui,"Noto Sans SC",sans-serif
+}
+main{max-width:650px;margin:20px auto;padding:15px}
+.card{
+ background:#1b2435;border:1px solid #303b50;
+ border-radius:18px;padding:20px;margin-bottom:15px
+}
+h1{font-size:25px;margin:0 0 8px}
+h2{font-size:18px;margin:5px 0 12px}
+.tip{font-size:13px;color:#aab5c8;line-height:1.7}
+label{display:block;margin:17px 0 8px;font-weight:600}
+input,textarea,select{
+ width:100%;padding:13px;border-radius:10px;
+ border:1px solid #46536b;background:#111a29;
+ color:white;font-size:16px
+}
+textarea{min-height:90px}
+button{
+ width:100%;padding:15px;border:0;border-radius:12px;
+ background:#3979f6;color:white;font-size:17px;
+ font-weight:bold;margin-top:18px
+}
+button:disabled{opacity:.5}
+.status{white-space:pre-wrap;line-height:1.6;margin-top:15px;font-size:14px}
+.preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.preview img{width:30%;height:110px;object-fit:cover;border-radius:8px}
+.small{font-size:12px;color:#9ba8bd;line-height:1.7;margin-top:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+<h1>🎬 AI 图片视频工作室</h1>
+<div class="tip">
+上传多张图片，自动合成 MP4 视频。支持字幕、普通话 AI 配音、录音和背景音乐。
+</div>
+</section>
+
 <form id="form">
-<label>① 选择图片（最多 8 张）</label>
-<input id="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
-<label>② 字幕（每行对应一张图片，可留空）</label>
-<textarea id="subs" placeholder="第一张图片显示的字幕&#10;第二张图片显示的字幕&#10;第三张图片显示的字幕"></textarea>
-<label>③ 每张图片显示时长</label>
-<select id="seconds"><option value="3">3 秒</option><option value="4" selected>4 秒</option><option value="5">5 秒</option><option value="6">6 秒</option><option value="8">8 秒</option></select>
-<label>④ 背景音乐（可选）</label>
+<section class="card">
+<h2>① 上传图片</h2>
+<label>选择 1–8 张图片</label>
+<input id="images" type="file"
+ accept="image/jpeg,image/png,image/webp"
+ multiple required>
+<div class="preview" id="preview"></div>
+<div class="small">支持 JPG、PNG、WEBP，每张图片不超过 12MB。</div>
+</section>
+
+<section class="card">
+<h2>② 视频字幕</h2>
+<label>每行对应一张图片</label>
+<textarea id="subs" placeholder="第一张图片的字幕
+第二张图片的字幕
+第三张图片的字幕"></textarea>
+
+<label>每张图片显示时间</label>
+<select id="seconds">
+<option value="3">3 秒</option>
+<option value="4" selected>4 秒</option>
+<option value="5">5 秒</option>
+<option value="6">6 秒</option>
+<option value="8">8 秒</option>
+</select>
+</section>
+
+<section class="card">
+<h2>③ 配音设置</h2>
+<label>配音方式</label>
+<select id="voiceMode">
+<option value="none">不配音</option>
+<option value="ai">AI 普通话配音</option>
+<option value="recording">上传自己的录音</option>
+</select>
+
+<div id="aiBox" hidden>
+<label>配音文字</label>
+<textarea id="narration"
+placeholder="输入想让 AI 朗读的内容"></textarea>
+<label>声音选择</label>
+<select id="voice">
+<option value="female">普通话女声</option>
+<option value="male">普通话男声</option>
+</select>
+</div>
+
+<div id="recordBox" hidden>
+<label>上传录音</label>
+<input id="recording" type="file" accept="audio/*">
+</div>
+</section>
+
+<section class="card">
+<h2>④ 背景音乐</h2>
 <input id="music" type="file" accept="audio/*">
-<button class="btn" id="go" type="submit">开始合成 MP4</button>
+<div class="small">可选 MP3、M4A、WAV 等音频文件。</div>
+</section>
+
+<section class="card">
+<h2>⑤ 生成视频</h2>
+<button id="go" type="submit">🚀 开始生成 MP4</button>
 <div class="status" id="status"></div>
+<div class="small">
+请保持页面打开，等待服务器完成视频合成。
+首次使用免费服务器可能需要等待唤醒。
+</div>
+</section>
 </form>
-<div class="small">免费服务器可能休眠；首次打开需等待唤醒。图片和音乐会上传到服务器临时处理，请勿上传隐私文件。每张图片不超过 12MB，音乐不超过 20MB，视频最长 64 秒。</div>
-</section></main>
+</main>
+
 <script>
-const form=document.getElementById('form'), status=document.getElementById('status'), go=document.getElementById('go');
-form.addEventListener('submit',async e=>{
- e.preventDefault();const imgs=document.getElementById('images').files;
- if(!imgs.length||imgs.length>8){status.textContent='请选择 1 到 8 张图片';return}
- const fd=new FormData();for(const f of imgs)fd.append('images',f);
- fd.append('subtitles',document.getElementById('subs').value);
- fd.append('seconds',document.getElementById('seconds').value);
- const music=document.getElementById('music').files[0];if(music)fd.append('music',music);
- go.disabled=true;status.textContent='正在上传并合成，请保持页面打开……';
- try{
-  const r=await fetch('/render',{method:'POST',body:fd});
-  if(!r.ok){let t=await r.text();throw new Error(t)}
-  const blob=await r.blob();const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='我的视频.mp4';document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent='合成完成！MP4 已开始下载。';
- }catch(err){status.textContent='合成失败：'+err.message}
- finally{go.disabled=false}
+const API="https://ai-video-workshop.onrender.com/render";
+
+const form=document.getElementById("form");
+const statusBox=document.getElementById("status");
+const go=document.getElementById("go");
+const mode=document.getElementById("voiceMode");
+
+mode.addEventListener("change",()=>{
+ document.getElementById("aiBox").hidden=mode.value!=="ai";
+ document.getElementById("recordBox").hidden=mode.value!=="recording";
 });
-</script></body></html>
+
+document.getElementById("images").addEventListener("change",e=>{
+ const box=document.getElementById("preview");
+ box.innerHTML="";
+ [...e.target.files].slice(0,8).forEach(file=>{
+  const img=document.createElement("img");
+  img.src=URL.createObjectURL(file);
+  box.appendChild(img);
+ });
+});
+
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+
+ const imgs=document.getElementById("images").files;
+
+ if(!imgs.length||imgs.length>8){
+  statusBox.textContent="请选择 1 到 8 张图片";
+  return;
+ }
+
+ if([...imgs].some(f=>f.size>12*1024*1024)){
+  statusBox.textContent="单张图片不能超过 12MB";
+  return;
+ }
+
+ if(imgs.length*Number(document.getElementById("seconds").value)>64){
+  statusBox.textContent="视频总时长不能超过 64 秒";
+  return;
+ }
+
+ if(mode.value==="ai"&&!document.getElementById("narration").value.trim()){
+  statusBox.textContent="请输入配音文字";
+  return;
+ }
+
+ if(mode.value==="recording"&&!document.getElementById("recording").files.length){
+  statusBox.textContent="请上传录音文件";
+  return;
+ }
+
+ const fd=new FormData();
+
+ for(const file of imgs)fd.append("images",file);
+
+ fd.append("subtitles",document.getElementById("subs").value);
+ fd.append("seconds",document.getElementById("seconds").value);
+ fd.append("voice_mode",mode.value);
+ fd.append("narration_text",document.getElementById("narration").value);
+ fd.append("voice_gender",document.getElementById("voice").value);
+
+ const recording=document.getElementById("recording").files[0];
+ if(recording)fd.append("recording",recording);
+
+ const music=document.getElementById("music").files[0];
+ if(music)fd.append("music",music);
+
+ go.disabled=true;
+ statusBox.textContent="正在连接 Render 服务器……\n请保持页面打开。";
+
+ try{
+  const response=await fetch(API,{
+   method:"POST",
+   body:fd
+  });
+
+  if(!response.ok){
+   const errorText=await response.text();
+   throw new Error("服务器错误 "+response.status+"\n"+errorText.slice(0,1200));
+  }
+
+  const contentType=response.headers.get("content-type")||"";
+
+  if(!contentType.includes("video/mp4")){
+   const result=await response.text();
+   throw new Error("服务器没有返回 MP4 文件：\n"+result.slice(0,1000));
+  }
+
+  statusBox.textContent="视频合成成功，正在准备下载……";
+
+  const blob=await response.blob();
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+
+  a.href=url;
+  a.download="我的视频.mp4";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+
+  statusBox.textContent="✅ 视频生成成功！请检查手机下载文件夹。";
+
+ }catch(error){
+  statusBox.textContent="❌ 生成失败：\n"+error.message;
+ }finally{
+  go.disabled=false;
+ }
+});
+</script>
+</body>
+</html>
